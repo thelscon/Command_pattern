@@ -23,6 +23,8 @@ interface ITextEditor {
 }
 class TextEditor implements ITextEditor {
     readonly #enteredText : string[] = []
+
+    // стек команд редактора сохраняет все команды, включая предыдущий и следующий шаг
     readonly #commandStack : stackType = []
     
     #temporaryMaximumIndex : number | null = null
@@ -203,7 +205,9 @@ interface IInvoker {
     beginСommand : executeType
 }
 class Invoker implements IInvoker {
-    readonly #commandStack : [EOperation , number , string | number][] = []
+    // стек инвокера сохраняет операции над текстом (добавление или удаление текста)
+    readonly #operationStack : [EOperation , number , string | number][] = []
+
     #indexCommandStack !: number
     #command !: CommandsType
     
@@ -215,7 +219,7 @@ class Invoker implements IInvoker {
         if (this.#command) {
             if (isInsertCommand (this.#command)) {
                 if (position !== undefined && typeof insertOrDelete === 'string') {
-                    this.#commandStack.push ([EOperation.Insert , position , insertOrDelete])
+                    this.#operationStack.push ([EOperation.Insert , position , insertOrDelete])
                     if (!this.#indexCommandStack) {
                         this.#indexCommandStack = 0
                     }else {
@@ -227,7 +231,7 @@ class Invoker implements IInvoker {
             if (isDeleteCommand (this.#command)) {
                 if (position && insertOrDelete) {
                     if (typeof insertOrDelete === 'number') {
-                        this.#commandStack.push ([EOperation.Delete , position , insertOrDelete])
+                        this.#operationStack.push ([EOperation.Delete , position , insertOrDelete])
                         if (!this.#indexCommandStack) {
                             this.#indexCommandStack = 0
                         }else {
@@ -254,7 +258,7 @@ class Invoker implements IInvoker {
 
     operationStack () {
         console.log (`operation stack`)
-        console.log (this.#commandStack)
+        console.log (this.#operationStack)
     }
 }
 
